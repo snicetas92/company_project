@@ -1,16 +1,29 @@
+
+
+from django.contrib import admin
+from django.urls import path, include  # Импортируем include здесь
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib import admin
-from django.urls import include, path
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    # Подключаем URL-адреса приложения employees.
-    path("", include("employees.urls")),
-    # Подключаем стандартные страницы входа/выхода Django.
-    path("accounts/", include("django.contrib.auth.urls")),
+    path('admin/', admin.site.urls),
+
+    # --- API v1 ---
+    # ИЗМЕНЕНИЕ: Указываем путь к новому файлу api_urls.py
+    path('api/v1/', include('employees.api_urls')),
+
+    # --- JWT Auth ---
+    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # --- Веб-интерфейс ---
+    path('', include('employees.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
 
-# Настройка для работы с медиа-файлами (изображениями) в режиме разработки
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
