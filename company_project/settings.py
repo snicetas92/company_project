@@ -23,7 +23,7 @@ SECRET_KEY = 'django-insecure-change-this-key-before-deploy-1234567890'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # В Docker разрешаем все хосты для простоты
 
 # Application definition
 
@@ -35,9 +35,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # 3rd PARTY APPS (Добавляем их ДО ваших приложений)
-    'rest_framework',  # Django REST Framework
-    'django_filters',  # Для фильтрации в API
+    # 3rd PARTY APPS (ДО ваших приложений)
+    'rest_framework',
+    'django_filters',
+    'corsheaders',  # Для CORS
+    'ckeditor',  # Для редактора текста
+    'drf_yasg',  # Для Swagger документации
 
     # YOUR APPS (ВАШИ ПРИЛОЖЕНИЯ)
     'employees',  # Должно быть первым, так как содержит модель пользователя
@@ -45,6 +48,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # CORS middleware должен быть наверху!
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,7 +65,7 @@ ROOT_URLCONF = 'company_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,36 +80,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'company_project.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+# Database (Переводим на PostgreSQL)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'company_db',  # Имя БД в контейнере PostgreSQL
+        'USER': 'postgres',  # Пользователь БД в контейнере
+        'PASSWORD': 'postgres',  # Пароль пользователя в контейнере
+        'HOST': 'db',  # Имя сервиса из docker-compose.yml
+        'PORT': 5432,
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
+# Password validation and other settings...
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
 ]
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
@@ -111,45 +104,50 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+# Настройка для правильного кэширования статики в продакшене
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 # Media files (Загружаемые изображения)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Custom User Model (ВАЖНО: Кастомная модель пользователя)
 AUTH_USER_MODEL = 'employees.CustomUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/employees/'
 
-# --- НАСТРОЙКИ DJANGO REST FRAMEWORK (DRF) ---
+# --- DRF SETTINGS (Django REST Framework) ---
 REST_FRAMEWORK = {
-    # Аутентификация через JWT-токены
+    # Используем JWT для аутентификации
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-
-    # Права доступа по умолчанию (все эндпоинты требуют авторизации)
-    # Мы будем переопределять это в конкретных ViewSet'ах
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #   'rest_framework.permissions.IsAuthenticated',
-    # ],
-
-    # Пагинация по умолчанию (10 элементов на страницу, как в ТЗ)
+    # Пагинация (10 на страницу)
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
 
-# --- НАСТРОЙКИ SIMPLE JWT (ВРЕМЯ ЖИЗНИ ТОКЕНОВ) ---
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+
+# --- CORS HEADERS ---
+CORS_ALLOW_ALL_ORIGINS = True  # Разрешаем запросы с любого домена
+
+# --- CKEDITOR SETTINGS ---
+CKEDITOR_CONFIGS = {
+    'default': {
+        # Настройка высоты редактора по умолчанию
+        'height': 300,
+    },
+}
+
+# --- SWAGGER SETTINGS ---
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        # Добавляем поддержку JWT токена прямо в Swagger UI
+        'Token Auth': {'type': 'apiKey', 'name': 'Authorization', 'in': 'header'},
+    }
 }
