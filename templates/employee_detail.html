@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+      <h2>{{ employee.get_full_name }}</h2>
+      <p><strong>Пол:</strong> {{ employee.get_gender_display }}</p>
+      <p><strong>Отчество:</strong> {{ employee.middle_name }}</p>
+      
+      <h3>Галерея:</h3>
+      {% for photo in photos %}
+          <img src="{{ photo.image.url }}" alt="Фото сотрудника" class="img-thumbnail mb-2" style="max-width: 100%;">
+          <p>Фото №{{ photo.order_number }}</p>
+      {% empty %}
+          <p>Фотографий нет.</p>
+      {% endfor %}
+      
+      {% if user.is_authenticated and user.pk == employee.pk %}
+          <!-- Здесь могут быть кнопки редактирования профиля -->
+      {% endif %}
+  </div>
+  
+  <div class="col-md-8">
+      <h3>Навыки:</h3>
+      {% if skills %}
+          <ul class="list-group">
+          {% for skill_link in skills %}
+              <li class="list-group-item">
+                  {{ skill_link.skill.name }} — Уровень: {{ skill_link.level }}
+              </li>
+          {% endfor %}
+          </ul>
+      {% else %}
+          <p>Навыков не указано.</p>
+      {% endif %}
+      
+      <a href="{% url 'employee_list' %}" class="btn btn-secondary mt-4">Назад к списку</a>
+  </div>
+</div>
+{% endblock %}

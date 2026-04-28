@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Добро пожаловать!</h2>
+<p>Это проект для управления сотрудниками и рабочими местами.</p>
+<h3>Наши сотрудники:</h3>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  {% for emp in employees %}
+  <div class="col">
+      <div class="card h-100">
+          <div class="card-body">
+              <h5 class="card-title">{{ emp.get_full_name }}</h5>
+              <p class="card-text"><strong>Навыки:</strong> {{ emp.employeeskill_set.count }} шт.</p>
+              <a href="{% url 'employee_detail' emp.pk %}" class="btn btn-primary">Подробнее</a>
+          </div>
+      </div>
+  </div>
+  {% empty %}
+  <p>Сотрудников пока нет.</p>
+  {% endfor %}
+</div>
+{% endblock %}
