@@ -1,25 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="row">
-  <div class="col-md-4">
-      <h2>{{ employee.get_full_name }}</h2>
-      <p><strong>Пол:</strong> {{ employee.get_gender_display }}</p>
-      <p><strong>Отчество:</strong> {{ employee.middle_name }}</p>
-      
-      <h3>Галерея:</h3>
-      {% for photo in photos %}
-          <img src="{{ photo.image.url }}" alt="Фото сотрудника" class="img-thumbnail mb-2" style="max-width: 100%;">
-          <p>Фото №{{ photo.order_number }}</p>
-      {% empty %}
-          <p>Фотографий нет.</p>
-      {% endfor %}
-      
-      {% if user.is_authenticated and user.pk == employee.pk %}
-          <!-- Здесь могут быть кнопки редактирования профиля -->
+  
+  <div class="col-md-4 text-center">
+      <!-- Заглавное фото -->
+      {% if main_photo %}
+          <img src="{{ main_photo.image.url }}" alt="" class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
       {% endif %}
+      
+      <h2>{{ employee.get_full_name }}</h2>
+      
+      <!-- Пол -->
+      <p><strong>Пол:</strong> {{ employee.get_gender_display }}</p>
+      
+      <!-- Номер стола -->
+      {% if workplace %}
+          <p><strong>Рабочее место:</strong> {{ workplace.desk_number }}</p>
+      {% endif %}
+      
+      <!-- Стаж -->
+      <p><strong>Стаж в компании:</strong> {{ tenure_days }} дней</p>
+      
   </div>
   
   <div class="col-md-8">
+      
+      <!-- Навыки с уровнями -->
       <h3>Навыки:</h3>
       {% if skills %}
           <ul class="list-group">
@@ -33,7 +39,21 @@
           <p>Навыков не указано.</p>
       {% endif %}
       
+      <!-- Галерея без первого фото -->
+      <h3>Галерея:</h3>
+      {% if gallery_photos %}
+          <div class="gallery d-flex flex-wrap gap-2">
+          {% for photo in gallery_photos %}
+              <img src="{{ photo.image.url }}" alt="" style="width: 150px; margin: 5px;">
+          {% endfor %}
+          </div>
+      {% else %}
+          <p>Дополнительных фотографий нет.</p>
+      {% endif %}
+      
       <a href="{% url 'employee_list' %}" class="btn btn-secondary mt-4">Назад к списку</a>
+      
   </div>
+  
 </div>
 {% endblock %}

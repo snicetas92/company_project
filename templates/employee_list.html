@@ -7,7 +7,10 @@
       <div class="card h-100">
           <div class="card-body">
               <h5 class="card-title">{{ emp.get_full_name }}</h5>
-              <p class="card-text"><strong>Навыки:</strong> {{ emp.employeeskill_set.count }} шт.</p>
+              
+              <!-- Задача 2.2: Стаж в днях (ИСПРАВЛЕНО) -->
+              <p class="card-text"><strong>Стаж:</strong> {{ emp.tenure_days }} дней</p>
+              
               <a href="{% url 'employee_detail' emp.pk %}" class="btn btn-primary">Подробнее</a>
           </div>
       </div>
@@ -16,4 +19,21 @@
   <p>Сотрудников пока нет.</p>
   {% endfor %}
 </div>
+
+<!-- Задача 2.1: Пагинация -->
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+      {% if employees.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page=1">Первая</a></li>
+          <li class="page-item"><a class="page-link" href="?page={{ employees.previous_page_number }}">Назад</a></li>
+      {% endif %}
+      
+      <li class="page-item disabled"><span>Страница {{ employees.number }} из {{ employees.paginator.num_pages }}</span></li>
+      
+      {% if employees.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ employees.next_page_number }}">Вперед</a></li>
+          <li class="page-item"><a class="page-link" href="?page={{ employees.paginator.num_pages }}">Последняя</a></li>
+      {% endif %}
+  </ul>
+</nav>
 {% endblock %}

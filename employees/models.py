@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
+from django.utils import timezone  # Для даты по умолчанию
 
 
 # --- 1. Менеджер для CustomUser ---
@@ -39,6 +40,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField('Пол', max_length=1, choices=GENDER_CHOICES, blank=True)
     middle_name = models.CharField('Отчество', max_length=150, blank=True)
 
+    # --- НОВОЕ ПОЛЕ: Дата приема на работу ---
+    hire_date = models.DateField('Дата приема на работу', default=timezone.now)
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
@@ -54,7 +58,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.get_full_name()
 
 
-# --- 3. Модель Навыка (Skill) ---
 class Skill(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -62,7 +65,6 @@ class Skill(models.Model):
         return self.name
 
 
-# --- 4. Промежуточная модель для связи Сотрудник-Навык ---
 class EmployeeSkill(models.Model):
     employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
@@ -72,29 +74,10 @@ class EmployeeSkill(models.Model):
         unique_together = ('employee', 'skill')
 
 
-# --- 5. Модель Фотографий сотрудника ---
 class EmployeePhoto(models.Model):
     employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='photos')
     image = models.ImageField(upload_to='employee_photos/')
     order_number = models.PositiveIntegerField(default=0)
 
-    # --- 6. Класс Meta для модели EmployeePhoto ---
-    # Этот блок относится ТОЛЬКО к модели EmployeePhoto
     class Meta:
         ordering = ['order_number']
-
-    # --- 7. РЕГИСТРАЦИЯ В АДМИНКЕ (ВНИМАНИЕ: ВЫНЕСЕНА ЗА ПРЕДЕЛЫ КЛАССА META) ---
-
-
-# Этот код должен быть здесь, на верхнем уровне файла, после всех моделей.
-from django.contrib import admin
-
-
-@admin.register(Skill)
-class SkillAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-
-
-@admin.register(EmployeeSkill)
-class EmployeeSkillAdmin(admin.ModelAdmin):
-    list_display = ('employee', 'skill', 'level')

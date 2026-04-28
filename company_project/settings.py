@@ -3,7 +3,9 @@ Django settings for company_project project.
 """
 
 import os
+from django.core.exceptions import ValidationError
 from pathlib import Path
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
