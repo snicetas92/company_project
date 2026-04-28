@@ -7,13 +7,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('employees', '0001_initial'),
+        ("employees", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customuser',
-            name='hire_date',
-            field=models.DateField(default=django.utils.timezone.now, verbose_name='Дата приема на работу'),
+            model_name="customuser",
+            name="hire_date",
+            field=models.DateField(
+                default=django.utils.timezone.now, verbose_name="Дата приема на работу"
+            ),
         ),
     ]

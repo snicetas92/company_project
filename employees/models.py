@@ -1,6 +1,10 @@
-from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
+from django.db import models
 from django.utils import timezone  # Для даты по умолчанию
 
 
@@ -8,24 +12,26 @@ from django.utils import timezone  # Для даты по умолчанию
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
         if not email:
-            raise ValueError('Email обязателен')
-        user = self.model(username=username, email=self.normalize_email(email), **extra_fields)
+            raise ValueError("Email обязателен")
+        user = self.model(
+            username=username, email=self.normalize_email(email), **extra_fields
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_superuser(self, username, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
         return self.create_user(email, username, password, **extra_fields)
 
 
 # --- 2. Модель CustomUser ---
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     GENDER_CHOICES = [
-        ('M', 'Мужской'),
-        ('F', 'Женский'),
-        ('O', 'Другой'),
+        ("M", "Мужской"),
+        ("F", "Женский"),
+        ("O", "Другой"),
     ]
 
     username = models.CharField(max_length=150, unique=True)
@@ -34,19 +40,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    first_name = models.CharField('Имя', max_length=150)
-    last_name = models.CharField('Фамилия', max_length=150)
+    first_name = models.CharField("Имя", max_length=150)
+    last_name = models.CharField("Фамилия", max_length=150)
 
-    gender = models.CharField('Пол', max_length=1, choices=GENDER_CHOICES, blank=True)
-    middle_name = models.CharField('Отчество', max_length=150, blank=True)
+    gender = models.CharField("Пол", max_length=1, choices=GENDER_CHOICES, blank=True)
+    middle_name = models.CharField("Отчество", max_length=150, blank=True)
 
     # --- НОВОЕ ПОЛЕ: Дата приема на работу ---
-    hire_date = models.DateField('Дата приема на работу', default=timezone.now)
+    hire_date = models.DateField("Дата приема на работу", default=timezone.now)
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email", "first_name", "last_name"]
 
     def get_full_name(self):
         name = f"{self.last_name} {self.first_name}"
@@ -71,13 +77,15 @@ class EmployeeSkill(models.Model):
     level = models.PositiveSmallIntegerField(default=1)
 
     class Meta:
-        unique_together = ('employee', 'skill')
+        unique_together = ("employee", "skill")
 
 
 class EmployeePhoto(models.Model):
-    employee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='photos')
-    image = models.ImageField(upload_to='employee_photos/')
+    employee = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="photos"
+    )
+    image = models.ImageField(upload_to="employee_photos/")
     order_number = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ['order_number']
+        ordering = ["order_number"]

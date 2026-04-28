@@ -15,12 +15,40 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Workplace',
+            name="Workplace",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('desk_number', models.CharField(max_length=20, unique=True, verbose_name='Номер стола')),
-                ('additional_info', models.TextField(blank=True, verbose_name='Дополнительная информация')),
-                ('employee', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='assigned_workplace', to=settings.AUTH_USER_MODEL, verbose_name='Сотрудник')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "desk_number",
+                    models.CharField(
+                        max_length=20, unique=True, verbose_name="Номер стола"
+                    ),
+                ),
+                (
+                    "additional_info",
+                    models.TextField(
+                        blank=True, verbose_name="Дополнительная информация"
+                    ),
+                ),
+                (
+                    "employee",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="assigned_workplace",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Сотрудник",
+                    ),
+                ),
             ],
         ),
     ]
